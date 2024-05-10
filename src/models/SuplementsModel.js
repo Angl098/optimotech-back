@@ -12,6 +12,10 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        category: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         description: {
             type: DataTypes.TEXT,
             allowNull: false
@@ -23,6 +27,10 @@ module.exports = (sequelize) => {
         image: {
             type: DataTypes.STRING,
             allowNull: false   
+        },
+        amount: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         }
         }, { timestamps: false }
     );
