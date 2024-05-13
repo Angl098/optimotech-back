@@ -26,8 +26,8 @@ const getSuplementById = async (id) => {
     return await Suplement.findByPk(id);
 }
 
-const createSuplement = async (name, category, description, price, image, amount) => {
-    return await Suplement.create({ name, category, description, price, image, amount });
+const createSuplement = async (suplement) => {
+    return await Suplement.create(suplement);
 }
 
 module.exports = { 

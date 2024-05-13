@@ -1,4 +1,5 @@
 const {Router} = require("express");
+const upload = require("../Midleware/Upload"); // Importa el middleware de Multer
 
 const suplementRouter = Router();
 
@@ -8,6 +9,6 @@ const { getSuplementsHandler, getSuplementByIdHandler, createSuplementHandler } 
 //Rutas
 suplementRouter.get("/", getSuplementsHandler);
 suplementRouter.get("/:id", getSuplementByIdHandler);
-suplementRouter.post("/", createSuplementHandler);
+suplementRouter.post("/", upload.array("images", 3), createSuplementHandler);
 
 module.exports = suplementRouter;
