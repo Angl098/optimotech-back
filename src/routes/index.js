@@ -6,6 +6,7 @@ const suplementRouter = require("./suplementRouter");
 const routes = Router();
 
 //Rutas
+
 routes.use("/users", userRouter);
 routes.use("/suplements", suplementRouter);
 

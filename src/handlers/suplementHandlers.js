@@ -1,5 +1,5 @@
 
-const { getSuplements, getSuplementByName, getSuplementById, createSuplement } = require('../controllers/suplementControllers');
+const { getSuplements, getSuplementByName, getSuplementById, createSuplement, getAllSuplementsController } = require('../controllers/suplementControllers');
 const cloudinaryPush= require("../utils/cloudinaryPush")
 const path = require("path");
 //por query
@@ -13,6 +13,15 @@ const getSuplementsHandler = async (req, res) => {
             const response = await getSuplements();
             res.status(200).json(response);
         }
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+const getAllSuplements = async (req, res) => {
+    try {
+            const response = await getAllSuplementsController();
+            res.status(200).json(response);
+        
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -58,4 +67,4 @@ const createSuplementHandler = async (req, res) => {
     }
 }
 
-module.exports = { getSuplementsHandler, getSuplementByIdHandler, createSuplementHandler }
+module.exports = { getSuplementsHandler, getSuplementByIdHandler, createSuplementHandler ,getAllSuplements}

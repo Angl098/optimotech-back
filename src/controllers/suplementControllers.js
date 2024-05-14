@@ -8,6 +8,10 @@ const getSuplements = async () => {
     const response = cleanInfoSuplements(suplements);
     return response
 }
+const getAllSuplementsController = async () => {
+    const suplements = await Suplement.findAll();
+    return suplements
+}
 
 
 const getSuplementByName = async (name) => {
@@ -34,5 +38,6 @@ module.exports = {
     getSuplements,
     getSuplementByName,
     getSuplementById, 
-    createSuplement 
+    createSuplement,
+    getAllSuplementsController
 }
