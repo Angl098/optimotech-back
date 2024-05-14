@@ -1,6 +1,7 @@
 
 const { getSuplements, getSuplementByName, getSuplementById, createSuplement } = require('../controllers/suplementControllers');
 const cloudinaryPush= require("../utils/cloudinaryPush")
+const path = require("path");
 //por query
 const getSuplementsHandler = async (req, res) => {
     const { name } = req.query;
@@ -33,11 +34,11 @@ const createSuplementHandler = async (req, res) => {
     const { name, category, description, price, image, amount } = req.body;
     const images = req.files;
     try {
-        
         // Obtener las rutas de las imágenes
         const imagePaths = images.map((image) =>
-            path.join(__dirname, "../../public/img/upload", image.filename)
+            path.join(__dirname, "../public/img/upload", image.filename)
         );
+        console.log(imagePaths);
         const uploadedImageUrls = await cloudinaryPush(imagePaths);
         console.log("backend");
         console.log(uploadedImageUrls);
@@ -46,7 +47,7 @@ const createSuplementHandler = async (req, res) => {
             category,
             description,
             price,
-            image,
+            image:uploadedImageUrls[0],
             amount,
           };
 
