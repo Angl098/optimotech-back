@@ -27,7 +27,7 @@ const getSuplementById = async (id) => {
 }
 
 const createSuplement = async (suplement,category) => {
-    const [category, created] = await Category.findOrCreate({
+    const [categoryCreated, created] = await Category.findOrCreate({
         where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
         defaults: { category }
     });
