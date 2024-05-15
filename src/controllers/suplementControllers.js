@@ -8,10 +8,6 @@ const getSuplements = async () => {
     const response = cleanInfoSuplements(suplements);
     return response
 }
-const getAllSuplementsController = async () => {
-    const suplements = await Suplement.findAll();
-    return suplements
-}
 
 
 const getSuplementByName = async (name) => {
@@ -61,6 +57,5 @@ module.exports = {
     getSuplementByName,
     getSuplementById, 
     createSuplement,
-    getHousingFilteredHandler,
-    getAllSuplementsController
+    getHousingFilteredHandler
 }
