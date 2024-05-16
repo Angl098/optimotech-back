@@ -65,9 +65,7 @@ const getFilteredSuplementsHandler = async (req, res) => {
     console.log(req.query);
     try {
         const suplements = await getFilteredSuplementsController(
-            category,
-            orderBy,
-            orderDirection
+            req.query
         );
         return res.json(suplements);
     } catch (error) {
