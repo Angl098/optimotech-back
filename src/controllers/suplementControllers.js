@@ -29,23 +29,26 @@ const getSuplementById = async (id) => {
 const createSuplement = async (suplement,category) => {
     const [categoryCreated, created] = await Category.findOrCreate({
         where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
-        defaults: { category }
+        defaults: { name: category }
     });
 
-    return await Suplement.create(suplement);
+    return await Suplement.create({
+        ...suplement,
+        CategoryId:categoryCreated.dataValues.id
+    });
 }
-const getHousingFilteredHandler = async (params) => {
+const getFilteredSuplementsController = async (params) => {
     const {category,orderBy,orderDirection}=params
     let order = [];
     if (orderBy && orderDirection) order = [[orderBy, orderDirection]];
   
-    let where = { availability: true };
+    let where = { };
   
     if (category) where = { ...where, category };
   
     try {
         
-        const suplementsFiltered = await Suplement.findAll({include, where, order });
+        const suplementsFiltered = await Suplement.findAll({ where, order });
         return suplementsFiltered;
 
     } catch (error) {
@@ -57,5 +60,5 @@ module.exports = {
     getSuplementByName,
     getSuplementById, 
     createSuplement,
-    getHousingFilteredHandler
+    getFilteredSuplementsController
 }

@@ -1,5 +1,5 @@
 
-const { getSuplements, getSuplementByName, getSuplementById, createSuplement } = require('../controllers/suplementControllers');
+const { getSuplements, getSuplementByName, getSuplementById, createSuplement, getFilteredSuplementsController } = require('../controllers/suplementControllers');
 const cloudinaryPush = require("../utils/cloudinaryPush")
 const path = require("path");
 //por query
@@ -49,7 +49,7 @@ const createSuplementHandler = async (req, res) => {
             amount,
         };
 
-        const response = await createSuplement(suplementData, CATE);
+        const response = await createSuplement(suplementData, category);
         res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -62,7 +62,7 @@ const getFilteredSuplementsHandler = async (req, res) => {
         orderBy,
         orderDirection
     } = req.query;
-
+    console.log(req.query);
     try {
         const suplements = await getFilteredSuplementsController(
             category,
