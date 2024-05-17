@@ -49,12 +49,14 @@ const createSuplementHandler = async (req, res) => {
             amount,
         };
 
-        const response = await createSuplement(suplementData, CATE);
+        const response = await createSuplement(suplementData, category);
         res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 }
+
+
 const getFilteredSuplementsHandler = async (req, res) => {
 
     const {

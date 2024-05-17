@@ -29,10 +29,10 @@ const getSuplementById = async (id) => {
 const createSuplement = async (suplement,category) => {
     const [categoryCreated, created] = await Category.findOrCreate({
         where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
-        defaults: { category }
+        defaults: { name: category }
     });
 
-    return await Suplement.create(suplement);
+    return await Suplement.create({...suplement, CategoryId: categoryCreated.dataValues.id});
 }
 const getHousingFilteredHandler = async (params) => {
     const {category,orderBy,orderDirection}=params

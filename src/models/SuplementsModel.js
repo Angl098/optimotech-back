@@ -14,6 +14,7 @@ module.exports = (sequelize) => {
         },
         category: {
             type: DataTypes.STRING,
+            defaultValue: "",
             allowNull: false
         },
         description: {
