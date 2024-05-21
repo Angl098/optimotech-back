@@ -11,6 +11,13 @@ const getSuplements = async () => {
             through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
         },
     ]});
+    const suplements = await Suplement.findAll({include : [
+        {
+            model: Category,
+            attributes: ["id", "name"], // Incluye solo los atributos que necesitas
+            through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
+        },
+    ]});
     const response = cleanInfoSuplements(suplements);
     return response
 }
