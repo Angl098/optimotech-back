@@ -3,7 +3,6 @@ const {verifyPassword}= require('../utils/hashedPassword');
 
 const loginHandler = async (req, res) => {
     const {email, password } = req.body;
-    console.log('llego gsd');
     try {
         const usuario = await loginController(email);
         if (!usuario) {
