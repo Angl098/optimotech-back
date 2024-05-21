@@ -1,13 +1,13 @@
 const { User } = require('../db');
 
-const login = async (email) => {
+const loginController = async (email) => {
     return await User.findOne({
         where: {
-        email
+        email:email
         }
       })
 }
 
 module.exports = {
-    login
+    loginController
 }

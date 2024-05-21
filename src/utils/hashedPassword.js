@@ -23,19 +23,5 @@ async function verifyPassword(plainPassword, hashedPassword) {
       throw new Error('Error al verificar la contraseña');
     }
   }
-  
-  // Ejemplo de uso
-  async function main() {
-    const plainPassword = 'contraseña123';
-    const hashedPassword = '$2b$10$KgIxN...'; // Hash almacenado en la base de datos
-    const match = await verifyPassword(plainPassword, hashedPassword);
-    if (match) {
-      console.log('La contraseña es válida');
-    } else {
-      console.log('La contraseña no es válida');
-    }
-  }
-  
-  
 
   module.exports = { hashPassword, verifyPassword}

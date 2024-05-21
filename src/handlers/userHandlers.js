@@ -6,8 +6,8 @@ const createUserHandler = async (req, res) => {
     let {password} =  req.body;
     password = await hashPassword(password);
     try {
-        const response = await createUser(name, sex, email, password, cellphone, address);
-        res.status(200).json(response);
+        await createUser(name, sex, email, password, cellphone, address);
+        res.status(200).json({ message: 'Registro de usuario Exitoso' });
     } catch (error) {
         res.status(400).json({ error: error.message });
         console.log(error);
