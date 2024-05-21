@@ -55,6 +55,8 @@ const createSuplementHandler = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
+
+
 const getFilteredSuplementsHandler = async (req, res) => {
 
     const {

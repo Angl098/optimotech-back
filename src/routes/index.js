@@ -3,6 +3,8 @@ const {Router} = require("express");
 const userRouter = require("./userRouter");
 const suplementRouter = require("./suplementRouter");
 const categoryRouter = require("./categoryRouter");
+const payment = require("./payment")
+const cart = require("./cart")
 
 const routes = Router();
 
@@ -11,5 +13,7 @@ const routes = Router();
 routes.use("/users", userRouter);
 routes.use("/category", categoryRouter);
 routes.use("/suplements", suplementRouter);
+routes.use("/payment", payment);
+routes.use("/", cart)
 
 module.exports = routes;
