@@ -11,4 +11,4 @@ const cleanInfoSuplements = (suplements) => {
     })
 }
 
-module.exports = { cleanInfoSuplements }
+module.exports = { cleanInfoSuplements}
