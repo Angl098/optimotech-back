@@ -4,13 +4,7 @@ const { Op, fn, col } = require('sequelize');
 const { cleanInfoSuplements } = require('../utils/index');
 
 const getSuplements = async () => {
-    const suplements = await Suplement.findAll({include : [
-        {
-            model: Category,
-            attributes: ["id", "name"], // Incluye solo los atributos que necesitas
-            through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
-        },
-    ]});
+
     const suplements = await Suplement.findAll({include : [
         {
             model: Category,
@@ -119,7 +113,7 @@ const getRandomSuplements = async () => {
                 },
             ],
             order: [
-                [Sequelize.fn('RANDOM')],
+                [fn('RANDOM')],
             ],
             limit: 3,
         });
