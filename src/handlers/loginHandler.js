@@ -3,20 +3,20 @@ const {verifyPassword}= require('../utils/hashedPassword');
 
 const loginHandler = async (req, res) => {
     const {email, password } = req.body;
-    console.log('llego gsd');
     try {
-        const usuario = await loginController(email);
-        if (!usuario) {
+        const user = await loginController(email);
+        if (!user) {
             return res.status(200).json({ message: 'Usuario no encontrado Registrate' });
           }
           //validar password
-          const validate = await verifyPassword(password, usuario.password);
+          const validate = await verifyPassword(password, user.password);
           if (!validate) {
             return res.status(200).json({ message: 'Contraseña incorrecta' });
           }
-
+const {id, name, address, cellphone, sex} = user;
+const dataUser = {id, email, name, address, cellphone, sex};
     // Si el usuario y la contraseña son válidos, enviar una respuesta exitosa
-    res.status(200).json({ message: 'Autenticación exitosa' });
+    res.status(200).json({ message: 'Autenticación exitosa', dataUser });
     } catch (error) {
         console.error('Error al autenticar usuario:', error);
         res.status(500).json({ message: 'Error interno del servidor' });

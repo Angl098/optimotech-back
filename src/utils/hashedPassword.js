@@ -24,4 +24,5 @@ async function verifyPassword(plainPassword, hashedPassword) {
     }
   }
 
+
   module.exports = { hashPassword, verifyPassword}
