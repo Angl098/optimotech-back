@@ -68,8 +68,8 @@ const includeAll = (categoryId) => {
 
 }
 
-const getFilteredSuplementsController = async (params) => {
-    const { category, orderBy, orderDirection } = params
+const getFilteredSuplementsController = async (query) => {
+    const { category, orderBy, orderDirection } = query
     let order = [];
     if (orderBy && orderDirection) {
         order = [[orderBy, orderDirection]]
@@ -101,10 +101,31 @@ const getFilteredSuplementsController = async (params) => {
         throw Error(error.message);
     }
 };
+const getRandomSuplements = async () => {
+    try {
+        const suplements = await Suplement.findAll({
+            include: [
+                {
+                    model: Category,
+                    attributes: ["id", "name"],
+                    through: { attributes: [] },
+                },
+            ],
+            order: [
+                [Sequelize.fn('RANDOM')],
+            ],
+            limit: 3,
+        });
+        return suplements;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
 module.exports = {
     getSuplements,
     getSuplementByName,
     getSuplementById,
     createSuplement,
-    getFilteredSuplementsController
+    getFilteredSuplementsController,
+    getRandomSuplements
 }
