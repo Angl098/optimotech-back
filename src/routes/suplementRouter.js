@@ -1,5 +1,5 @@
 const {Router} = require("express");
-const upload = require("../Midleware/Upload"); // Importa el middleware de Multer
+const upload = require("../middleware/upload"); // Importa el middleware de Multer
 
 const suplementRouter = Router();
 
