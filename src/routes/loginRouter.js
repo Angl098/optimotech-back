@@ -1,11 +1,11 @@
 const {Router} = require("express");
 
-const userRouter = Router();
+const loginRouter = Router();
 
 //Importar los handlers
 const {loginHandler} = require("../handlers/login");
 
 //Rutas
-userRouter.post("/login", loginHandler);
+loginRouter.post("/", loginHandler);
 
-module.exports = userRouter;
+module.exports = loginRouter;
