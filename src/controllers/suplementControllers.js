@@ -122,11 +122,33 @@ const getRandomSuplements = async () => {
         throw new Error(error.message);
     }
 };
+
+const updateSuplement = async (id, suplementData, category) => {
+    try {
+        const suplement = await Suplement.findByPk(id);
+        if (!suplement) {
+            throw new Error('Suplemento no encontrado');
+        }
+
+        // Actualizar los campos del suplemento
+        await suplement.update(suplementData);
+
+        // Si hay una categoría, actualizarla también (esto depende de cómo esté definida tu relación de categorías)
+        if (category) {
+            await suplement.setCategory(category);
+        }
+
+        return suplement;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
 module.exports = {
     getSuplements,
     getSuplementByName,
     getSuplementById,
     createSuplement,
     getFilteredSuplementsController,
-    getRandomSuplements
+    getRandomSuplements,
+    updateSuplement
 }
