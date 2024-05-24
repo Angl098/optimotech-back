@@ -69,8 +69,8 @@ const includeAll = (categoryId) => {
 
 }
 
-const getFilteredSuplementsController = async (query) => {
-    const { category, orderBy, orderDirection } = query
+const getFilteredSuplementsController = async (params) => {
+    const { category, orderBy, orderDirection, name } = params
     let order = [];
     if (orderBy && orderDirection) {
         order = [[orderBy, orderDirection]]
@@ -78,7 +78,7 @@ const getFilteredSuplementsController = async (query) => {
 
     let where = {};
 
-    // if (category) where = { ...where, category };
+    if (name) where = { ...where, name };
 
     try {
         // let include= includeAll(category)
