@@ -11,17 +11,14 @@ const client = new MercadoPagoConfig({ accessToken: `${ACCESS_TOKEN}` });
 
 
 const createOrder = async (req, res) => {
+    console.log(req.body);
     try {
         const body = {
             items: [
                 {
-                    // title: item.name,
-                    // quantity: item.quantity,
-                    // unit_price: item.price,
-                    // currency_id: "ARS",
                     title: req.body.title,
-                    unit_price: Number(req.body.price),
-                    quantity: Number(req.body.quantity),
+                    unit_price: parseFloat(req.body.price),
+                    quantity: parseFloat(req.body.quantity),
                     currency_id: "ARS",
                 },
             ],
@@ -36,9 +33,8 @@ const createOrder = async (req, res) => {
 
         const preference = new Preference(client)
         const result = await preference.create({ body })
-        res.json({
-            id: result.id,
-        });
+        
+        res.json({ id: result.id });
     } catch (error) {
         console.log(error);
         res.status(500).json({
