@@ -5,13 +5,15 @@ const { cleanInfoSuplements } = require('../utils/index');
 
 const getSuplements = async () => {
 
-    const suplements = await Suplement.findAll({include : [
-        {
-            model: Category,
-            attributes: ["id", "name"], // Incluye solo los atributos que necesitas
-            through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
-        },
-    ]});
+    const suplements = await Suplement.findAll({
+        include: [
+            {
+                model: Category,
+                attributes: ["id", "name"], // Incluye solo los atributos que necesitas
+                through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
+            },
+        ]
+    });
     const response = cleanInfoSuplements(suplements);
     return response
 }
@@ -70,7 +72,7 @@ const includeAll = (categoryId) => {
 }
 
 const getFilteredSuplementsController = async (params) => {
-    const { category, orderBy, orderDirection, name } = params
+    const { category, orderBy, orderDirection, name, page=1, pageSize=7} = params;
     let order = [];
     if (orderBy && orderDirection) {
         order = [[orderBy, orderDirection]]
@@ -78,7 +80,7 @@ const getFilteredSuplementsController = async (params) => {
 
     let where = {};
 
-    if (name) where = { ...where, name };
+    if (name) where = { ...where, name: { [Op.iLike]: `%${name}%` } }; // Filtro case-insensitive
 
     try {
         // let include= includeAll(category)
@@ -92,11 +94,30 @@ const getFilteredSuplementsController = async (params) => {
             });
         }
 
+        // Calcular el offset en función de la página y el tamaño de página
+        const offset = (page - 1) * pageSize ;
 
-        console.log("Query parameters:", { include, where, order });
-        const suplementsFiltered = await Suplement.findAll({ include, where, order });
+        const body={
+            include,
+            where,
+            order,
+            limit: pageSize,
+            offset
+        }
+        console.log(body ,"BODY");
+        // Realizar la consulta con Sequelize
+        const { count, rows } = await Suplement.findAndCountAll(body);
+            // Calcular el número total de páginas
+            const totalPages = Math.ceil(count / pageSize);
 
-        return suplementsFiltered;
+            // Devolver los suplementos filtrados, el número total de páginas y la página actual
+            return {
+                totalPages,
+                currentPage: page,
+                pageSize,
+                totalItems: count,
+                items: rows
+            };
 
     } catch (error) {
         throw Error(error.message);
