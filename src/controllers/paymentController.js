@@ -14,26 +14,28 @@ const createOrder = async (req, res) => {
     console.log(req.body);
     try {
         const body = {
-            items: [
-                {
-                    title: req.body.title,
-                    unit_price: parseFloat(req.body.price),
-                    quantity: parseFloat(req.body.quantity),
+            items: req.body.items.map((item) => {
+                return {
+                    title: item.title,
+                    unit_price: parseFloat(item.price),
+                    quantity: parseFloat(item.quantity),
                     currency_id: "ARS",
-                },
-            ],
+                }
+            }
+            ),
             back_urls: {
-                "success": `https://github.com/Angl098/optimotech-front`,
-                "failure": `https://github.com/Angl098/optimotech-front`,
-                "pending": `https://github.com/Angl098/optimotech-front`
+                "success": `http://localhost:5173/home`,
+                "failure": `http://localhost:5173/home`,
+                "pending": `http://localhost:5173/home`
             },
-            auto_retunr: "approved",
+            auto_return: "approved",
         };
 
 
         const preference = new Preference(client)
+        console.log("preference:", preference)
         const result = await preference.create({ body })
-        
+
         res.json({ id: result.id });
     } catch (error) {
         console.log(error);
