@@ -35,8 +35,8 @@ const createOrder = async (req, res) => {
         const preference = new Preference(client)
         console.log("preference:", preference)
         const result = await preference.create({ body })
-
-        res.json({ id: result.id });
+        console.log(result);
+        res.json({ point:result.init_point });
     } catch (error) {
         console.log(error);
         res.status(500).json({
