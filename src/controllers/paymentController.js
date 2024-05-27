@@ -31,7 +31,6 @@ const createOrder = async (req, res) => {
             auto_return: "approved",
         };
 
-
         const preference = new Preference(client)
         console.log("preference:", preference)
         const result = await preference.create({ body })
