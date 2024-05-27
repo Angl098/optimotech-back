@@ -25,15 +25,28 @@ const getSuplementByName = async (name) => {
             // Utilizamos la expresión regular para buscar coincidencias de cualquier palabra del nombre
             name: {
                 [Op.iLike]: `%${name}%`
-            }
+            },
+
+
         }
     });
 };
 
 
 const getSuplementById = async (id) => {
-    return await Suplement.findByPk(id);
-}
+    try {
+        const suplement = await Suplement.findByPk(id, {
+            include: {
+                model: Category,
+                through: { attributes: [] } // Esto excluye los atributos de la tabla intermedia si es necesario
+            }
+        });
+        return suplement;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
 
 const createSuplement = async (suplement, category) => {
     const [categoryCreated, created] = await Category.findOrCreate({
@@ -72,7 +85,7 @@ const includeAll = (categoryId) => {
 }
 
 const getFilteredSuplementsController = async (params) => {
-    const { category, orderBy, orderDirection, name, page=1, pageSize=7} = params;
+    const { category, orderBy, orderDirection, name, page = 1, pageSize = 7 } = params;
     let order = [];
     if (orderBy && orderDirection) {
         order = [[orderBy, orderDirection]]
@@ -95,29 +108,29 @@ const getFilteredSuplementsController = async (params) => {
         }
 
         // Calcular el offset en función de la página y el tamaño de página
-        const offset = (page - 1) * pageSize ;
+        const offset = (page - 1) * pageSize;
 
-        const body={
+        const body = {
             include,
             where,
             order,
             limit: pageSize,
             offset
         }
-        console.log(body ,"BODY");
+        console.log(body, "BODY");
         // Realizar la consulta con Sequelize
         const { count, rows } = await Suplement.findAndCountAll(body);
-            // Calcular el número total de páginas
-            const totalPages = Math.ceil(count / pageSize);
+        // Calcular el número total de páginas
+        const totalPages = Math.ceil(count / pageSize);
 
-            // Devolver los suplementos filtrados, el número total de páginas y la página actual
-            return {
-                totalPages,
-                currentPage: page,
-                pageSize,
-                totalItems: count,
-                items: rows
-            };
+        // Devolver los suplementos filtrados, el número total de páginas y la página actual
+        return {
+            totalPages,
+            currentPage: page,
+            pageSize,
+            totalItems: count,
+            items: rows
+        };
 
     } catch (error) {
         throw Error(error.message);
@@ -146,6 +159,20 @@ const getRandomSuplements = async () => {
 
 const updateSuplement = async (id, suplementData, category) => {
     try {
+
+        console.log(category);
+        const categoryFind = await Category.findOne({
+            where:{name:category},
+        });
+        if (!categoryFind) {
+            console.log("no existe categoria");
+        }
+        console.log(categoryFind);
+        const [categoryCreated, created] = await Category.findOrCreate({
+            where:{name:category},
+            defaults: { name: category }
+        });
+        console.log(categoryCreated);
         const suplement = await Suplement.findByPk(id);
         if (!suplement) {
             throw new Error('Suplemento no encontrado');
@@ -154,13 +181,13 @@ const updateSuplement = async (id, suplementData, category) => {
         // Actualizar los campos del suplemento
         await suplement.update(suplementData);
 
-        // Si hay una categoría, actualizarla también (esto depende de cómo esté definida tu relación de categorías)
-        if (category) {
-            await suplement.setCategory(category);
-        }
+
+        await suplement.setCategory(categoryCreated);
+
 
         return suplement;
     } catch (error) {
+        console.log("error aqui");
         throw new Error(error.message);
     }
 }
