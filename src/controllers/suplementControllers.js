@@ -158,21 +158,16 @@ const getRandomSuplements = async () => {
 };
 
 const updateSuplement = async (id, suplementData, category) => {
+    console.log(id);
+    console.log(suplementData);
+    console.log(category);
     try {
-
-        console.log(category);
-        const categoryFind = await Category.findOne({
-            where:{name:category},
-        });
-        if (!categoryFind) {
-            console.log("no existe categoria");
-        }
-        console.log(categoryFind);
         const [categoryCreated, created] = await Category.findOrCreate({
-            where:{name:category},
+            where: { name: category },
             defaults: { name: category }
         });
-        console.log(categoryCreated);
+        console.log(created);
+        
         const suplement = await Suplement.findByPk(id);
         if (!suplement) {
             throw new Error('Suplemento no encontrado');
@@ -181,16 +176,16 @@ const updateSuplement = async (id, suplementData, category) => {
         // Actualizar los campos del suplemento
         await suplement.update(suplementData);
 
-
-        await suplement.setCategory(categoryCreated);
-
+        // Asignar la categoría
+        await suplement.setCategories([categoryCreated]);
 
         return suplement;
     } catch (error) {
-        console.log("error aqui");
+        console.log("Error aquí");
         throw new Error(error.message);
     }
 }
+
 module.exports = {
     getSuplements,
     getSuplementByName,
