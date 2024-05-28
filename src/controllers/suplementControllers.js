@@ -48,18 +48,57 @@ const getSuplementById = async (id) => {
 };
 
 
-const createSuplement = async (suplement, category) => {
-    const [categoryCreated, created] = await Category.findOrCreate({
-        where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
-        defaults: { name: category }
-    });
+// const createSuplement = async (suplement, category) => {
+//     const [categoryCreated, created] = await Category.findOrCreate({
+//         where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
+//         defaults: { name: category }
+//     });
 
-    const suplementCreated = await Suplement.create(suplement);
+//     const suplementCreated = await Suplement.create(suplement);
 
-    await suplementCreated.addCategory(categoryCreated);
+//     await suplementCreated.addCategory(categoryCreated);
 
-    return suplementCreated;
-}
+//     return suplementCreated;
+// }
+const createSuplement = async (suplement, category, provider, tags) => {
+    try {
+        // Crear o encontrar el proveedor
+        const [providerCreated] = await Provider.findOrCreate({
+            where: { name: provider },
+            defaults: { name: provider }
+        });
+
+        // Crear o encontrar la categoría y obtener su ID
+        const [categoryCreated] = await Category.findOrCreate({
+            where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
+            defaults: { name: category }
+        });
+
+        // Crear el suplemento con la categoría asociada
+        const suplementCreated = await Suplement.create({
+            ...suplement,
+            CategoryId: categoryCreated.id,
+            ProviderId: providerCreated.id
+        });
+
+        // Crear o encontrar las etiquetas y asociarlas con el suplemento
+        const tagsArray = await Promise.all(
+            tags.map(async (tag) => {
+                const [tagCreated] = await Tag.findOrCreate({
+                    where: where(fn('LOWER', col('name')), Op.eq, tag.toLowerCase()),
+                    defaults: { name: tag }
+                });
+                return tagCreated;
+            })
+        );
+        await suplementCreated.addTags(tagsArray);
+
+        return suplementCreated;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
 const includeAll = (categoryId) => {
     if (categoryId) {
         return include = [
@@ -157,34 +196,77 @@ const getRandomSuplements = async () => {
     }
 };
 
-const updateSuplement = async (id, suplementData, category) => {
-    console.log(id);
-    console.log(suplementData);
-    console.log(category);
-    try {
-        const [categoryCreated, created] = await Category.findOrCreate({
-            where: { name: category },
-            defaults: { name: category }
-        });
-        console.log(created);
+// const updateSuplement = async (id, suplementData, category) => {
+//     console.log(id);
+//     console.log(suplementData);
+//     console.log(category);
+//     try {
+//         const [categoryCreated, created] = await Category.findOrCreate({
+//             where: { name: category },
+//             defaults: { name: category }
+//         });
+//         console.log(created);
         
+//         const suplement = await Suplement.findByPk(id);
+//         if (!suplement) {
+//             throw new Error('Suplemento no encontrado');
+//         }
+
+//         // Actualizar los campos del suplemento
+//         await suplement.update(suplementData);
+
+//         // Asignar la categoría
+//         await suplement.setCategories([categoryCreated]);
+
+//         return suplement;
+//     } catch (error) {
+//         console.log("Error aquí");
+//         throw new Error(error.message);
+//     }
+// }
+const updateSuplement = async (id, suplementData, category, provider, tags) => {
+    try {
         const suplement = await Suplement.findByPk(id);
         if (!suplement) {
             throw new Error('Suplemento no encontrado');
         }
 
-        // Actualizar los campos del suplemento
-        await suplement.update(suplementData);
+        // Crear o encontrar el proveedor y obtener su ID
+        const [providerCreated] = await Provider.findOrCreate({
+            where: { name: provider },
+            defaults: { name: provider }
+        });
 
-        // Asignar la categoría
-        await suplement.setCategories([categoryCreated]);
+        // Crear o encontrar la categoría y obtener su ID
+        const [categoryCreated] = await Category.findOrCreate({
+            where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
+            defaults: { name: category }
+        });
+
+        // Actualizar los campos del suplemento y asociar el proveedor y la categoría
+        await suplement.update({
+            ...suplementData,
+            CategoryId: categoryCreated.id,
+            ProviderId: providerCreated.id
+        });
+
+        // Crear o encontrar las etiquetas y asociarlas con el suplemento
+        const tagsArray = await Promise.all(
+            tags.map(async (tag) => {
+                const [tagCreated] = await Tag.findOrCreate({
+                    where: where(fn('LOWER', col('name')), Op.eq, tag.toLowerCase()),
+                    defaults: { name: tag }
+                });
+                return tagCreated;
+            })
+        );
+        await suplement.setTags(tagsArray);
 
         return suplement;
     } catch (error) {
-        console.log("Error aquí");
         throw new Error(error.message);
     }
-}
+};
 
 module.exports = {
     getSuplements,

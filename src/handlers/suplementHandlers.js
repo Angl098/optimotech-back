@@ -41,7 +41,7 @@ const getSuplementByIdHandler = async (req, res) => {
 
 //por body
 const createSuplementHandler = async (req, res) => {
-    const { name, category, description, price, amount } = req.body;
+    const { name, category, description, price, amount,  provider ,tags } = req.body;
     const images = req.files;
     try {
         // Obtener las rutas de las imágenes
@@ -58,7 +58,7 @@ const createSuplementHandler = async (req, res) => {
             amount,
         };
 
-        const response = await createSuplement(suplementData, category);
+        const response = await createSuplement(suplementData, category,  provider , tags);
         res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -88,7 +88,7 @@ const getFilteredSuplementsHandler = async (req, res) => {
 
 const updateSuplementHandler = async (req, res) => {
     const { id } = req.params;
-    const { name, categories, description, price, amount } = req.body;
+    const { name, categories, description, price, amount ,provider,tags } = req.body;
     const images = req.files;
 
     try {
@@ -118,7 +118,7 @@ const updateSuplementHandler = async (req, res) => {
             suplementData.image = uploadedImageUrls[0];
         }
 
-        const response = await updateSuplement(id, suplementData, categories);
+        const response = await updateSuplement(id, suplementData, categories ,provider ,tags);
         res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ error: error.message });
