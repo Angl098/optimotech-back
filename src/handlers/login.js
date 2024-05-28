@@ -17,7 +17,7 @@ const loginHandler = async (req, res) => {
         }
 
         // Successful authentication, return only the user ID
-        return res.status(200).json({ userId: user.id });
+        return res.status(200).json({ userId: user.id, email: user.email });
     } catch (error) {
         console.error('Error al autenticar usuario:', error);
         return res.status(500).json({ mensaje: 'Error interno del servidor' });
