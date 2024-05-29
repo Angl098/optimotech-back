@@ -101,10 +101,28 @@ const getFilteredSuplementsController = async (params) => {
         throw Error(error.message);
     }
 };
+
+const editSuplementController = async (id, name, description, price, amount) => {
+    const suplement = await Suplement.findByPk(id);
+
+    if (!suplement) {
+        throw new Error('Suplement not found');  
+    }
+    suplement.name = name;
+    suplement.description = description;
+    suplement.price = price;
+    suplement.amount = amount;
+
+    await suplement.save();
+    return suplement;
+}
+
+
 module.exports = { 
     getSuplements,
     getSuplementByName,
     getSuplementById, 
     createSuplement,
-    getFilteredSuplementsController
+    getFilteredSuplementsController,
+    editSuplementController
 }
