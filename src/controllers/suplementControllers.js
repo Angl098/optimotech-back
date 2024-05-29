@@ -1,4 +1,4 @@
-const { Suplement, Category } = require('../db.js');
+const { Suplement, Category, Provider, Tag } = require('../db.js');
 const { where } = require('sequelize');
 const { Op, fn, col } = require('sequelize');
 const { cleanInfoSuplements } = require('../utils/index');
@@ -7,15 +7,26 @@ const getSuplements = async () => {
 
     const suplements = await Suplement.findAll({
         include: [
+            // {
+            //     model: Category,
+            //     as: 'category', // Ensure this matches the alias in your relationship definition
+            //     attributes: ['id', 'name'],
+            // },
+            // {
+            //     model: Provider,
+            //     as: 'Provider', // Ensure this matches the alias in your relationship definition
+            //     attributes: ['id', 'name'],
+            // },
             {
-                model: Category,
-                attributes: ["id", "name"], // Incluye solo los atributos que necesitas
-                through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
-            },
+                model: Tag,
+                as: 'Tags', // Ensure this matches the alias in your relationship definition
+                attributes: ['id', 'name'],
+                through: { attributes: [] } // Exclude the attributes from the join table
+            }
         ]
     });
-    const response = cleanInfoSuplements(suplements);
-    return response
+    // const response = cleanInfoSuplements(suplements);
+    return suplements
 }
 
 
@@ -26,6 +37,24 @@ const getSuplementByName = async (name) => {
             name: {
                 [Op.iLike]: `%${name}%`
             },
+            include: [
+                // {
+                //     model: Category,
+                //     as: 'category', // Ensure this matches the alias in your relationship definition
+                //     attributes: ['id', 'name'],
+                // },
+                // {
+                //     model: Provider,
+                //     as: 'Provider', // Ensure this matches the alias in your relationship definition
+                //     attributes: ['id', 'name'],
+                // },
+                {
+                    model: Tag,
+                    as: 'Tags', // Ensure this matches the alias in your relationship definition
+                    attributes: ['id', 'name'],
+                    through: { attributes: [] } // Exclude the attributes from the join table
+                }
+            ]
 
 
         }
@@ -36,10 +65,24 @@ const getSuplementByName = async (name) => {
 const getSuplementById = async (id) => {
     try {
         const suplement = await Suplement.findByPk(id, {
-            include: {
-                model: Category,
-                through: { attributes: [] } // Esto excluye los atributos de la tabla intermedia si es necesario
-            }
+            include: [
+                // {
+                //     model: Category,
+                //     as: 'category', // Ensure this matches the alias in your relationship definition
+                //     attributes: ['id', 'name'],
+                // },
+                // {
+                //     model: Provider,
+                //     as: 'Provider', // Ensure this matches the alias in your relationship definition
+                //     attributes: ['id', 'name'],
+                // },
+                {
+                    model: Tag,
+                    as: 'Tags', // Ensure this matches the alias in your relationship definition
+                    attributes: ['id', 'name'],
+                    through: { attributes: [] } // Exclude the attributes from the join table
+                }
+            ]
         });
         return suplement;
     } catch (error) {
@@ -82,16 +125,13 @@ const createSuplement = async (suplement, category, provider, tags) => {
         });
 
         // Crear o encontrar las etiquetas y asociarlas con el suplemento
-        const tagsArray = await Promise.all(
-            tags.map(async (tag) => {
-                const [tagCreated] = await Tag.findOrCreate({
-                    where: where(fn('LOWER', col('name')), Op.eq, tag.toLowerCase()),
-                    defaults: { name: tag }
-                });
-                return tagCreated;
-            })
-        );
-        await suplementCreated.addTags(tagsArray);
+        const tagsArray = JSON.parse(tags);
+
+        // Crear o encontrar las etiquetas y asociarlas con el suplemento
+        for (const tagName of tagsArray) {
+            const [tagCreated] = await Tag.findOrCreate({ where: { name: tagName } });
+            await suplementCreated.addTag(tagCreated);
+        }
 
         return suplementCreated;
     } catch (error) {
@@ -99,32 +139,8 @@ const createSuplement = async (suplement, category, provider, tags) => {
     }
 };
 
-const includeAll = (categoryId) => {
-    if (categoryId) {
-        return include = [
-            {
-                model: Category,
-                where: { id: categoryId },
-                attributes: ["id", "name"], // Incluye solo los atributos que necesitas
-                through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
-            },
-        ]
-    }
-    else {
-        return include = [
-            {
-                model: Category,
-                attributes: ["id", "name"], // Incluye solo los atributos que necesitas
-                through: { attributes: [] }, // No incluye los atributos de la tabla intermedia
-            },
-        ]
-
-    }
-
-}
-
 const getFilteredSuplementsController = async (params) => {
-    const { category, orderBy, orderDirection, name, page = 1, pageSize = 7 } = params;
+    const { category, tags, provider, orderBy, orderDirection, name, page = 1, pageSize = 7 } = params;
     let order = [];
     if (orderBy && orderDirection) {
         order = [[orderBy, orderDirection]]
@@ -145,6 +161,26 @@ const getFilteredSuplementsController = async (params) => {
                 where: { id: category }
             });
         }
+        if (provider) {
+            include.push({
+                model: Provider,
+                attributes: ['name'], // Excluye los atributos de ID
+                where: { name: { [Op.iLike]: `%${provider}%` } }
+            });
+        }
+
+        if (tags && tags.length > 0) {
+            include.push({
+                model: Tag,
+                attributes: ['name'], // Excluye los atributos de ID
+                through: { attributes: [] }, // Excluye los atributos de la tabla intermedia
+                where: {
+                    name: {
+                        [Op.in]: tags
+                    }
+                }
+            });
+        }
 
         // Calcular el offset en función de la página y el tamaño de página
         const offset = (page - 1) * pageSize;
@@ -156,7 +192,7 @@ const getFilteredSuplementsController = async (params) => {
             limit: pageSize,
             offset
         }
-        console.log(body, "BODY");
+
         // Realizar la consulta con Sequelize
         const { count, rows } = await Suplement.findAndCountAll(body);
         // Calcular el número total de páginas
@@ -178,13 +214,6 @@ const getFilteredSuplementsController = async (params) => {
 const getRandomSuplements = async () => {
     try {
         const suplements = await Suplement.findAll({
-            include: [
-                {
-                    model: Category,
-                    attributes: ["id", "name"],
-                    through: { attributes: [] },
-                },
-            ],
             order: [
                 [fn('RANDOM')],
             ],
@@ -206,7 +235,7 @@ const getRandomSuplements = async () => {
 //             defaults: { name: category }
 //         });
 //         console.log(created);
-        
+
 //         const suplement = await Suplement.findByPk(id);
 //         if (!suplement) {
 //             throw new Error('Suplemento no encontrado');
@@ -251,16 +280,13 @@ const updateSuplement = async (id, suplementData, category, provider, tags) => {
         });
 
         // Crear o encontrar las etiquetas y asociarlas con el suplemento
-        const tagsArray = await Promise.all(
-            tags.map(async (tag) => {
-                const [tagCreated] = await Tag.findOrCreate({
-                    where: where(fn('LOWER', col('name')), Op.eq, tag.toLowerCase()),
-                    defaults: { name: tag }
-                });
-                return tagCreated;
-            })
-        );
-        await suplement.setTags(tagsArray);
+        const tagsArray = JSON.parse(tags);
+
+        // Crear o encontrar las etiquetas y asociarlas con el suplemento
+        for (const tagName of tagsArray) {
+            const [tagCreated] = await Tag.findOrCreate({ where: { name: tagName } });
+            await suplement.setTags(tagCreated);
+        }
 
         return suplement;
     } catch (error) {
