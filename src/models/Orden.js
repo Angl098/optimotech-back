@@ -11,10 +11,10 @@ module.exports = (sequelize) => {
         },
         total: {
             type: DataTypes.DECIMAL(10, 2),
-            allowNull: false
+            allowNull: true
         },
         status: {
-            type: DataTypes.ENUM('abierto', 'pagado', 'cancelado'),
+            type: DataTypes.ENUM('pending', 'completed', 'cancelled'),
             defaultValue: 'abierto'
         },
     }

@@ -1,8 +1,10 @@
-const mercadopago = require('mercadopago')
 require('dotenv').config();
-const { MercadoPagoConfig, Preference } = require('mercadopago');
 const { ACCESS_TOKEN } = process.env;
-const { crearOrden } = require('../controllers/crearOrden')
+const { Orden, Suplement } = require('../db');
+const axios = require('axios')
+//IMPORTS MERCADO PAGO
+const { MercadoPagoConfig, Preference } = require('mercadopago');
+const mercadopago = require('mercadopago')
 
 
 const client = new MercadoPagoConfig({ accessToken: `${ACCESS_TOKEN}` });
@@ -11,7 +13,7 @@ const client = new MercadoPagoConfig({ accessToken: `${ACCESS_TOKEN}` });
 const createOrder = async (req, res) => {
     // console.log(req.body);
     const { items, total } = req.body;
-    
+
     try {
         const body = {
             items: req.body.items.map((item) => {
@@ -28,17 +30,14 @@ const createOrder = async (req, res) => {
                 "failure": `http://localhost:5173/home`,
                 "pending": `http://localhost:5173/home`
             },
-            notification_url: "https://9882-186-128-85-193.ngrok-free.app/payment/webhook",
+            notification_url: "https://fa91-186-128-85-193.ngrok-free.app/payment/webhook",
         };
-        
+
         const preference = new Preference(client)
-        // console.log("preference:", preference)
 
         const result = await preference.create({ body })
-        console.log(result);
-
-
-        res.json({ point:result.init_point,  });
+        // console.log(result);
+        res.json({ point: result.init_point, });
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -47,25 +46,76 @@ const createOrder = async (req, res) => {
     }
 }
 
-const receiveWebhook = async(req, res) => {
-    console.log('Datos recibidos en el webhook:', req.query);
+const receiveWebhook = async (req, res) => {
+    // console.log('datos recibidos en el webhook:', req.query);
 
-    const payment = req.query
-    
-    try {
-        if(payment.type === "payment") {
-            
-            const data = await mercadopago.payment.get(payment['data.id'])
-            console.log(data);
+    const paymentId = req.query['data.id'];
+    const topic = req.query.type;
 
-            //GUARDAR EN BASEDEDATOS
+    if (topic === 'payment') {
+        try {
+            const response = await axios.get(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+                headers: {
+                    Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                }
+            });
+
+            const payment = response.data;
+            // console.log('Datos de la api de mp:', payment);
+
+            const { transaction_details, additional_info, status: mpStatus, payer } = payment;
+            const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100); // convirtiendo a num entero
+            const items = additional_info.items;
+            // console.log('items:', items);
+            console.log('Payer:', payer);
+
+            let status;
+            if (mpStatus === 'approved') {
+                status = 'completed';
+            } else if (mpStatus === 'pending') {
+                status = 'pending';
+            } else {
+                status = 'cancelled';
+            }
+
+            // crear la orden
+            const orden = await Orden.create({
+                total: total_paid_amount,
+                status,
+                paymentMethod: 'mercadopago'
+            });
+
+            // AÑADIR suplementos a la orden
+            for (const item of items) {
+                // ESTRUCTURA DEL ITEM
+                if (!item.title || !item.quantity || !item.unit_price) {
+                    throw new Error(`El item no tiene la estructura esperada: ${JSON.stringify(item)}`);
+                }
+
+                const suplementoName = item.title;
+                const cantidad = parseInt(item.quantity, 10);
+                const precio = Math.round(parseFloat(item.unit_price) * 100); 
+
+                // console.log(`Buscando suplemento con título: ${suplementoName}`);
+
+                const suplemento = await Suplement.findOne({ where: { name: suplementoName } });
+                if (!suplemento) {
+                    throw new Error(`Suplemento con título ${suplementoName} no encontrado en la base de datos`);
+                }
+                console.log(`Suplemento encontrado: ${suplemento.id}, añadiendo a la orden`);
+                await orden.addSuplement(suplemento, { through: { cantidad, precio } });
+            }
+
+            res.status(200).send('webhook proces con exito');
+        } catch (error) {
+            console.error('Error al procesar el webhook de Mercado Pago:', error);
+            res.status(500).json({
+                message: 'Error al procesar el webhook de Mercado Pago',
+                error: error.message
+            });
         }
-    
-        res.status(204)
-        
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({error: error.message})
+    } else {
+        res.status(400).send('tipo de webhook no soportado');
     }
 }
 

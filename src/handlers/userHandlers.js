@@ -1,4 +1,3 @@
-const { createUser } = require('../controllers/userController');
 const {hashPassword}= require('..//utils/hashedPassword');
 const { createUser, sendEmailController } = require('../controllers/userController');
 
