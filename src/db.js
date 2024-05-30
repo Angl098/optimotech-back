@@ -5,13 +5,13 @@ const path = require('path');
 
 // Leo las variables de entorno
 const {
-  DB_USER, DB_PASSWORD, DB_HOST, DB_NAME ,DB_DEPLOY
+  DB_USER, DB_PASSWORD, DB_HOST, DB_NAME, DB_DEPLOY
 } = process.env;
 
 ///////////////BASE//DE//DATOS//LOCAL/////////////////////////////////////////////////////////////////////
 const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`, {
-    logging: false, // set to console.log to see the raw SQL queries
-    native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+  logging: false, // set to console.log to see the raw SQL queries
+  native: false, // lets Sequelize know we can use pg-native for ~30% more speed
 });
 ///////////////BASE//DE//DATOS//DEPLOY/////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ sequelize.models = Object.fromEntries(capsEntries);
 
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
-const { Suplement, User ,Category, Cart, CartItem } = sequelize.models;
+const { Suplement, User, Category, Orden, OrdenSuplement } = sequelize.models;
 
 // Aca vendrian las relaciones
 // Product.hasMany(Reviews);
@@ -51,12 +51,13 @@ User.belongsToMany(Suplement, { through: 'suplement_user' });
 Suplement.belongsToMany(Category, { through: "category_suplement" });
 Category.belongsToMany(Suplement, { through: "category_suplement" });
 
-User.hasMany(Cart, { as: 'carts', foreignKey: 'userId' });
-Suplement.hasMany(CartItem, { as: 'itemProducts', foreignKey: 'suplementId' });
-Cart.belongsTo(User, { as: 'user' });
-CartItem.belongsTo(Suplement, { as: 'suplement', foreignKey: 'suplementId' });
-Cart.hasMany(CartItem, { as: 'cartItems', foreignKey: 'cartId' });
-CartItem.belongsTo(Cart, { as: 'cart', foreignKey: 'cartId' });
+
+Orden.belongsTo(User, { foreignKey: 'userId' });
+Orden.belongsToMany(Suplement, { through: 'orden_suplement', foreignKey: 'ordenId' });
+Suplement.belongsToMany(Orden, { through: 'orden_suplement', foreignKey: 'suplementId' });
+
+
+
 
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');
