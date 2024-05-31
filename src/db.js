@@ -59,7 +59,6 @@ Suplement.belongsTo(Category, {
 // User.hasMany(Cart, { as: 'carts', foreignKey: 'userId' });
 // Suplement.hasMany(CartItem, { as: 'itemProducts', foreignKey: 'suplementId' });
 
-
 Orden.belongsTo(User, { foreignKey: 'userId' });
 Orden.belongsToMany(Suplement, { through: 'orden_suplement', foreignKey: 'ordenId' });
 Suplement.belongsToMany(Orden, { through: 'orden_suplement', foreignKey: 'suplementId' });
