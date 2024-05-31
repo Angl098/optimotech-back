@@ -4,6 +4,7 @@ const userRouter = require("./userRouter");
 const suplementRouter = require("./suplementRouter");
 const categoryRouter = require("./categoryRouter");
 const payment = require("./payment")
+const getOrders = require('./getOrders')
 
 const loginRouter = require('./loginRouter');
 
@@ -16,7 +17,7 @@ routes.use("/users", userRouter);
 routes.use("/category", categoryRouter);
 routes.use("/suplements", suplementRouter);
 routes.use("/payment", payment);
-
+routes.use('/orders', getOrders)
 routes.use('/login', loginRouter);
 
 module.exports = routes;
