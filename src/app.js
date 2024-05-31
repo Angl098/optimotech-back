@@ -6,6 +6,7 @@ const routes = require('./routes/index.js');
 const path = require('path')
 
 const cors = require('cors');
+const session = require('express-session');
 
 require('./db.js');
 
@@ -27,9 +28,19 @@ server.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers','Access-Control-Allow-Headers',
   'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  // res.header('Content-Security-Policy', "style-src 'self' https://www.gstatic.com 'unsafe-inline' *.mercadopago.com");
+  res.header('Content-Security-Policy', "script-src 'nonce-5fdqtuzg9t7TxPuYTvFClA==' 'strict-dynamic' 'unsafe-eval' 'report-sample' https: 'unsafe-inline' https://http2.mlstatic.com; style-src 'self' https://www.gstatic.com 'unsafe-inline'");
   next();
 });
-
+server.use(session({
+    secret: 'your-session-secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      sameSite: 'none',
+      secure: true
+    }
+  }));
 server.use('/', routes);
 server.use(express.static(path.resolve('src/public')))
 

@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
 
-    sequelize.define('Cart', {
+    sequelize.define('orden', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -11,16 +11,13 @@ module.exports = (sequelize) => {
         },
         total: {
             type: DataTypes.DECIMAL(10, 2),
-            allownull: false,
+            allowNull: true
         },
-        paymentMethod: {
-            type: DataTypes.STRING(25),
-            allownull: false,
+        status: {
+            type: DataTypes.ENUM('pending', 'completed', 'cancelled'),
+            defaultValue: 'abierto'
         },
-        payment_status: {
-            type: DataTypes.STRING(40),
-            allownull: false,
-        },
-        }
+    }
     );
-}
+};
+

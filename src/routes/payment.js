@@ -10,7 +10,7 @@ router.post('/create_preference', createOrder)
 // router.get('/failure', (req, res) => res.send('failure'))
 // router.get('/pending', (req, res) => res.send('pending'))
 //Webhook escucha por eventos de mercado pago
-// router.post('/webhook', receiveWebhook)
+router.post('/webhook', receiveWebhook)
 
 
 module.exports = router;
