@@ -66,16 +66,16 @@ const getSuplementById = async (id) => {
     try {
         const suplement = await Suplement.findByPk(id, {
             include: [
-                // {
-                //     model: Category,
-                //     as: 'category', // Ensure this matches the alias in your relationship definition
-                //     attributes: ['id', 'name'],
-                // },
-                // {
-                //     model: Provider,
-                //     as: 'Provider', // Ensure this matches the alias in your relationship definition
-                //     attributes: ['id', 'name'],
-                // },
+                {
+                    model: Category,
+                    as: 'category', // Ensure this matches the alias in your relationship definition
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: Provider,
+                    as: 'Provider', // Ensure this matches the alias in your relationship definition
+                    attributes: ['id', 'name'],
+                },
                 {
                     model: Tag,
                     as: 'Tags', // Ensure this matches the alias in your relationship definition
