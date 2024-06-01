@@ -2,6 +2,7 @@ const { Suplement, Category, Provider, Tag } = require('../db.js');
 const { where } = require('sequelize');
 const { Op, fn, col } = require('sequelize');
 const { cleanInfoSuplements } = require('../utils/index');
+const stringToTagsArray = require('../utils/stringToTagsArray.js');
 
 const getSuplements = async () => {
 
@@ -104,6 +105,7 @@ const getSuplementById = async (id) => {
 //     return suplementCreated;
 // }
 const createSuplement = async (suplement, category, provider, tags) => {
+
     try {
         // Crear o encontrar el proveedor
         const [providerCreated] = await Provider.findOrCreate({
@@ -149,37 +151,31 @@ const getFilteredSuplementsController = async (params) => {
     let where = {};
 
     if (name) where = { ...where, name: { [Op.iLike]: `%${name}%` } }; // Filtro case-insensitive
+    if (category) where = { ...where, CategoryId:category  }; // Filtro case-insensitive
 
     try {
-        // let include= includeAll(category)
         let include = [];
-
-        if (category) {
-            include.push({
-                model: Category,
-                through: { attributes: [] }, // Esto excluye los atributos de la tabla intermedia
-                where: { id: category }
-            });
-        }
         if (provider) {
             include.push({
                 model: Provider,
-                attributes: ['name'], // Excluye los atributos de ID
-                where: { name: { [Op.iLike]: `%${provider}%` } }
+                as:"Provider",
+                where: { id: provider }
             });
         }
+        if(tags){
 
-        if (tags && tags.length > 0) {
-            include.push({
-                model: Tag,
-                attributes: ['name'], // Excluye los atributos de ID
-                through: { attributes: [] }, // Excluye los atributos de la tabla intermedia
-                where: {
-                    name: {
-                        [Op.in]: tags
+            const tagsArray=stringToTagsArray(tags)
+            if ( tagsArray.length > 0) {
+                include.push({
+                    model: Tag,
+                    as:"Tags",
+                    where: {
+                        name: {
+                            [Op.in]: tagsArray
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         // Calcular el offset en función de la página y el tamaño de página
@@ -253,7 +249,8 @@ const getRandomSuplements = async () => {
 //         throw new Error(error.message);
 //     }
 // }
-const updateSuplement = async (id, suplementData, category, provider, tags) => {
+const updateSuplement = async (id, suplementData, tags) => {
+
     try {
         const suplement = await Suplement.findByPk(id);
         if (!suplement) {
@@ -262,14 +259,14 @@ const updateSuplement = async (id, suplementData, category, provider, tags) => {
 
         // Crear o encontrar el proveedor y obtener su ID
         const [providerCreated] = await Provider.findOrCreate({
-            where: { name: provider },
-            defaults: { name: provider }
+            where: { name: suplementData.provider },
+            defaults: { name: suplementData.provider }
         });
 
         // Crear o encontrar la categoría y obtener su ID
         const [categoryCreated] = await Category.findOrCreate({
-            where: where(fn('LOWER', col('name')), Op.eq, category.toLowerCase()),
-            defaults: { name: category }
+            where: where(fn('LOWER', col('name')), Op.eq, suplementData.category.toLowerCase()),
+            defaults: { name: suplementData.category }
         });
 
         // Actualizar los campos del suplemento y asociar el proveedor y la categoría
@@ -280,13 +277,19 @@ const updateSuplement = async (id, suplementData, category, provider, tags) => {
         });
 
         // Crear o encontrar las etiquetas y asociarlas con el suplemento
-        const tagsArray = JSON.parse(tags);
+        const tagsArray = stringToTagsArray(tags);
+        console.log(tagsArray, "tagsArray");
 
-        // Crear o encontrar las etiquetas y asociarlas con el suplemento
-        for (const tagName of tagsArray) {
-            const [tagCreated] = await Tag.findOrCreate({ where: { name: tagName } });
-            await suplement.setTags(tagCreated);
-        }
+        // Crear o encontrar las etiquetas y recogerlas en un array
+        const tagInstances = await Promise.all(
+            tagsArray.map(async (tagName) => {
+                const [tagCreated] = await Tag.findOrCreate({ where: { name: tagName } });
+                return tagCreated;
+            })
+        );
+
+        // Asociar todas las etiquetas con el suplemento
+        await suplement.setTags(tagInstances);
 
         return suplement;
     } catch (error) {

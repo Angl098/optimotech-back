@@ -12,6 +12,6 @@ suplementRouter.get("/randomSuplementes", getRandomSuplementsHandler);
 suplementRouter.get("/filter", getFilteredSuplementsHandler);
 suplementRouter.get("/:id", getSuplementByIdHandler);
 suplementRouter.post("/", upload.array("images", 3), createSuplementHandler);
-suplementRouter.put("/:id", upload.array("images", 3), updateSuplementHandler);
+suplementRouter.put("/", upload.array("images", 3), updateSuplementHandler);
 
 module.exports = suplementRouter;

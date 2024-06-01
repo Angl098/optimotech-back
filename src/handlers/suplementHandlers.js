@@ -49,7 +49,6 @@ const createSuplementHandler = async (req, res) => {
             path.join(__dirname, "../public/img/upload", image.filename)
         );
         const uploadedImageUrls = await cloudinaryPush(imagePaths);
-
         let suplementData = {
             name,
             description,
@@ -73,7 +72,6 @@ const getFilteredSuplementsHandler = async (req, res) => {
         orderBy,
         orderDirection
     } = req.query;
-    console.log(req.query);
     try {
         const suplements = await getFilteredSuplementsController(
             req.query
@@ -87,12 +85,12 @@ const getFilteredSuplementsHandler = async (req, res) => {
 
 
 const updateSuplementHandler = async (req, res) => {
-    const { id } = req.params;
-    const { name, categories, description, price, amount ,provider,tags } = req.body;
+    const { id ,name, category, description, price, amount ,provider,tags ,image} = req.body;
     const images = req.files;
 
     try {
         const existingSuplement = await getSuplementById(id);
+
         if (!existingSuplement) {
             return res.status(404).json({ error: 'Suplemento no encontrado' });
         }
@@ -102,12 +100,16 @@ const updateSuplementHandler = async (req, res) => {
             description,
             price,
             amount,
+            category,
+            provider
         };
-
+        console.log("handle");
+        console.log(images);
         if (images && images.length > 0) {
+            console.log("handle if");
             // Eliminar la imagen actual de Cloudinary
             const publicId = existingSuplement.image.split('/').pop().split('.')[0];
-            console.log(publicId);
+            console.log(publicId);  
             await deleteImageFromCloudinary(publicId);
 
             // Obtener las rutas de las nuevas imágenes
@@ -118,7 +120,7 @@ const updateSuplementHandler = async (req, res) => {
             suplementData.image = uploadedImageUrls[0];
         }
 
-        const response = await updateSuplement(id, suplementData, categories ,provider ,tags);
+        const response = await updateSuplement(id, suplementData ,tags);
         res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ error: error.message });
