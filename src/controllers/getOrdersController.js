@@ -22,7 +22,7 @@ const getOrdersController = async (req, res) => {
 //                     include: [Suplement]
 //                 },
 //                 {
-//                     model: User, // Si quieres incluir detalles del usuario
+//                     model: User, 
 //                 }
 //             ]
 //         });
@@ -40,4 +40,4 @@ const getOrdersController = async (req, res) => {
 
 
 
-module.exports = { getOrdersController, getOrderDetails  }
+module.exports = { getOrdersController, }
