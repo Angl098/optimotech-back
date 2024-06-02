@@ -33,7 +33,6 @@ const createOrder = async (req, res) => {
             auto_retunr: "approved",
         };
 
-
         const preference = new Preference(client)
         const result = await preference.create({ body })
         res.json({

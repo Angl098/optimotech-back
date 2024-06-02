@@ -1,5 +1,5 @@
 const {Router} = require("express");
-const { createCategoryHandler, getCategoryHandler } = require("../handlers/categoryHandler");
+const { createCategoryHandler, getCategoryHandler, updateCategoryHandler } = require("../handlers/categoryHandler");
 
 const categoryRouter = Router();
 
@@ -8,5 +8,6 @@ const categoryRouter = Router();
 //Rutas
 categoryRouter.post("/", createCategoryHandler);
 categoryRouter.get("/", getCategoryHandler);
+categoryRouter.put("/", updateCategoryHandler);
 
 module.exports = categoryRouter;
