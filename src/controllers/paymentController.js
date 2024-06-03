@@ -30,7 +30,7 @@ const createOrder = async (req, res) => {
                 "failure": `http://localhost:5173/home`,
                 "pending": `http://localhost:5173/home`
             },
-            notification_url: "https://9a94-186-128-85-193.ngrok-free.app/payment/webhook",
+            notification_url: "https://8aac-186-128-30-31.ngrok-free.app/payment/webhook",
         };
 
         const preference = new Preference(client)
