@@ -24,8 +24,10 @@ const createCart = async (req, res) => {
 
 //agregamos un suplem a un carrito q ya existe
 const addSuplementToCart = async (req, res) => {
-    const { cartId, suplements } = req.body;
-
+    const {cartId}=req.params
+    console.log(cartId);
+    const {suplements } = req.body;
+    console.log(req.body);
     try {
         const cart = await Cart.findByPk(cartId);
         if (!cart) {
