@@ -1,5 +1,15 @@
 const { Cart, Suplement, User  } = require('../db');
 
+const getAllCarts = async (req, res) => {
+    try {
+        const carts = await Cart.findAll();
+        res.status(200).json(carts);
+    } catch (error) {
+        console.error('Error fetching carts:', error);
+        res.status(500).json({ error: 'Error fetching carts' });
+    }
+};
+
 // el carrito lo creamos cuando el usuario ya esta logeado y procede a confirmar el pedido abonandolo
 const createCart = async (req, res) => {
     const { total, paymentMethod, paymentStatus, userId } = req.body;
@@ -66,4 +76,4 @@ const getCartById = async (req, res) => {
     }
 };
 
-module.exports = { createCart, addSuplementToCart, getCartById };
+module.exports = { createCart, addSuplementToCart, getCartById, getAllCarts };

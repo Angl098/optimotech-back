@@ -30,7 +30,7 @@ const createOrder = async (req, res) => {
                 "failure": `http://localhost:5173/home`,
                 "pending": `http://localhost:5173/home`
             },
-            notification_url: "https://9a94-186-128-85-193.ngrok-free.app/payment/webhook",
+            notification_url: "https://a315-186-128-109-75.ngrok-free.app/payment/webhook",
         };
 
         const preference = new Preference(client)
@@ -47,7 +47,7 @@ const createOrder = async (req, res) => {
 }
 
 const receiveWebhook = async (req, res) => {
-    console.log('datos recibidos en el webhook:', req.query);
+    // console.log('datos recibidos en el webhook:', req.query);
 
     const paymentId = req.query['data.id'];
     const topic = req.query.type;
@@ -61,7 +61,7 @@ const receiveWebhook = async (req, res) => {
             });
 
             const payment = response.data;
-            console.log('Datos de la api de mp:', payment);
+            // console.log('Datos de la api de mp:', payment);
 
             const { transaction_details, additional_info, status: mpStatus, payer } = payment;
             const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100); // convirtiendo a num entero
@@ -96,7 +96,7 @@ const receiveWebhook = async (req, res) => {
                 const cantidad = parseInt(item.quantity, 10);
                 const precio = Math.round(parseFloat(item.unit_price) * 100); 
 
-                console.log(`Buscando suplemento con título: ${suplementoName}`);
+                // console.log(`Buscando suplemento con título: ${suplementoName}`);
 
                 const suplemento = await Suplement.findOne({ where: { name: suplementoName } });
                 if (!suplemento) {
