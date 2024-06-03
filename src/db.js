@@ -40,17 +40,24 @@ sequelize.models = Object.fromEntries(capsEntries);
 
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
-const { Suplement, User, Category, Orden, OrdenSuplement, Cart, CartSuplements } = sequelize.models;
+const { Suplement, User, Category, Orden,Provider, Tag, OrdenSuplement, Cart, CartSuplements } = sequelize.models;
 
 // Aca vendrian las relaciones
 // Product.hasMany(Reviews);
 
-Suplement.belongsToMany(User, { through: 'suplement_user' });
-User.belongsToMany(Suplement, { through: 'suplement_user' });
+// Una categoría tiene muchos suplementos
+Category.hasMany(Suplement, {
+  foreignKey: 'CategoryId',
+  onDelete: 'CASCADE'
+});
 
-Suplement.belongsToMany(Category, { through: "category_suplement" });
-Category.belongsToMany(Suplement, { through: "category_suplement" });
+// Un suplemento pertenece a una categoría
+Suplement.belongsTo(Category, {
+  foreignKey: 'CategoryId'
+});
 
+// User.hasMany(Cart, { as: 'carts', foreignKey: 'userId' });
+// Suplement.hasMany(CartItem, { as: 'itemProducts', foreignKey: 'suplementId' });
 
 Orden.belongsTo(User, { foreignKey: 'userId' });
 Orden.belongsToMany(Suplement, { through: 'orden_suplement', foreignKey: 'ordenId' });
@@ -64,6 +71,12 @@ Cart.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 Cart.belongsToMany(Suplement, { through: CartSuplements, foreignKey: 'cartId' });
 Suplement.belongsToMany(Cart, { through: CartSuplements, foreignKey: 'suplementId' });
 
+
+Suplement.belongsTo(Provider);
+Provider.hasMany(Suplement);
+
+Suplement.belongsToMany(Tag, { through: "SuplementTag" });
+Tag.belongsToMany(Suplement, { through: "SuplementTag" });
 
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');
