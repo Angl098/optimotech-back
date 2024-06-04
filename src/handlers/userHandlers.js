@@ -1,5 +1,5 @@
 const {hashPassword}= require('..//utils/hashedPassword');
-const { createUser, sendEmailController } = require('../controllers/userController');
+const { createUser, sendEmailController, getFilteredUserController } = require('../controllers/userController');
 
 const { loginController } = require('../controllers/loginController');
 
@@ -34,6 +34,19 @@ const sendEmail = async (req, res) => {
         res.status(400).json({ error: error.message });
     }    
 }
- 
+const getFilteredUsersHandler = async (req, res) => {
 
-module.exports = { createUserHandler, sendEmail }
+   
+    try {
+        const users = await getFilteredUserController(
+            req.query
+        );
+        return res.json(users);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+}
+
+
+module.exports = { createUserHandler, sendEmail ,getFilteredUsersHandler}
