@@ -13,8 +13,37 @@ const sendEmailController = async (email) => {
         html: `<h1>¡Cuenta creada exitosamente!</h1>`
     })
 }
+const getAllUsers = async () => {
+    return await User.findAll({
+        attributes: { exclude: ['password'] },
+        paranoid: false // Include soft-deleted users
+    });
+};
+const banUser = async (id) => {
+    const user = await User.findByPk(id);
+    if (!user) {
+        throw new Error('Usuario no encontrado');
+    }
 
+    user.banned = true; // Actualizar la columna banned a true
+    await user.save();
+    return user;
+}
+
+const unbanUser = async (id) => {
+    const user = await User.findByPk(id, { paranoid: false }); // Incluir usuarios eliminados lógicamente
+    if (!user) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    user.banned = false; // Actualizar la columna banned a false
+    await user.save();
+    return user;
+};
 module.exports = {
     createUser,
-    sendEmailController
+    sendEmailController,
+    getAllUsers,
+    banUser,
+    unbanUser
 }
