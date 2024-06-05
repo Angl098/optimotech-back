@@ -38,7 +38,7 @@ module.exports = (sequelize) => {
         }
     }, {
         paranoid: true, // Activar borrado lógico
-        timestamps: true,
+        timestamps: false,
     }
     );
 }

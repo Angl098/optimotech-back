@@ -3,7 +3,7 @@ const {Router} = require("express");
 const userRouter = Router();
 
 //Importar los handlers
-const {createUserHandler, sendEmail, getFilteredUsersHandler, changePasswordHandler} = require("../handlers/userHandlers");
+const { getFilteredUsersHandler, changePasswordHandler} = require("../handlers/userHandlers");
 const {createUserHandler, sendEmail, getAll, banUserHandler, unBanUserHandler} = require("../handlers/userHandlers");
 
 //Rutas

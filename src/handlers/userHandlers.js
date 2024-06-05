@@ -1,7 +1,6 @@
 const {hashPassword}= require('..//utils/hashedPassword');
 const { createUser, sendEmailController, getFilteredUserController, changePasswordController } = require('../controllers/userController');
-const { hashPassword } = require('..//utils/hashedPassword');
-const { createUser, sendEmailController, getAllUsers, banUser, unbanUser } = require('../controllers/userController');
+const {  getAllUsers, banUser, unbanUser } = require('../controllers/userController');
 
 const { loginController } = require('../controllers/loginController');
 
