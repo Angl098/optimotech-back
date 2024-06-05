@@ -5,14 +5,15 @@ const createUser = async (name, sex, email, password, cellphone, address) => {
     return await User.create({name, sex, email, password, cellphone, address});
 }
 
-const sendEmailController = async (email) => {
+const sendEmailController = async (email, name) => {
     return await transporter.sendMail({
         from: process.env.EMAIL,
         to: email,
         subject: 'Optimotech - Cuenta Creada',
-        html: `<h1>¡Cuenta creada exitosamente!</h1>`
+        html: `<h1>¡Hola ${name}, tu cuenta ha sido creada exitosamente!</h1>`
     })
 }
+
 const getAllUsers = async () => {
     return await User.findAll({
         attributes: { exclude: ['password'] },

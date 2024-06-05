@@ -8,32 +8,28 @@ const createUserHandler = async (req, res) => {
     let { password } = req.body;
     try {
         password = await hashPassword(password);
-        //verificar que el email no se encuentre registrado
+
+        // Verificar que el email no se encuentre registrado
         let dataUser = await loginController(email);
         if (dataUser) {
             return res.status(200).json({ message: 'Usuario registrado "Inicia sesion..."', dataUser });
         }
 
+        // Crear el usuario
         await createUser(name, sex, email, password, cellphone, address);
         dataUser = { name, sex, email, cellphone, address };
-        res.status(200).json({ message: 'Usuario Registrado "Inicia sesion..."', dataUser });
+
+        // Enviar el correo electrónico de confirmación
+        const emailResponse = await sendEmailController(email, name);
+
+        res.status(200).json({ message: 'Usuario Registrado "Inicia sesion..."', dataUser, emailResponse });
     } catch (error) {
         res.status(400).json({ error: error.message });
-        console.log(error);
+        console.error(error);
     }
 }
 
 
-
-const sendEmail = async (req, res) => {
-    const { email } = req.body;
-    try {
-        const response = await sendEmailController(email);
-        res.status(200).json(response);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}
 const banUserHandler = async (req, res) => {
     const { id } = req.params;
     try {
@@ -63,4 +59,4 @@ const getAll = async (req, res) => {
 }
 
 
-module.exports = { createUserHandler, sendEmail, getAll ,banUserHandler,unBanUserHandler}
+module.exports = { createUserHandler, getAll ,banUserHandler,unBanUserHandler}
