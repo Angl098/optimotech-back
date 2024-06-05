@@ -31,7 +31,14 @@ module.exports = (sequelize) => {
         address: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        banned: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
-        }, { timestamps: false }
+    }, {
+        paranoid: true, // Activar borrado lógico
+        timestamps: true,
+    }
     );
 }
