@@ -1,12 +1,12 @@
-const { Orden, OrdenSuplement, Suplement } = require('../db')
+const { Orden, OrdenSuplement, Suplement, User } = require('../db')
 
 const getOrdersController = async (req, res) => {
     try {
         const orders = await Orden.findAll();
         res.json(orders);
     } catch (error) {
-        console.error('Error al obtener las órdenes:', error);
-        res.status(500).json({ error: 'Error al obtener las órdenes' });
+        console.error('Error al obtener las ordenes:', error);
+        res.status(500).json({ error: 'Error al obtener las ordenes' });
     }
 }
 
@@ -19,11 +19,7 @@ const getOrdersController = async (req, res) => {
 //             include: [
 //                 {
 //                     model: OrdenSuplement,
-//                     include: [Suplement]
 //                 },
-//                 {
-//                     model: User, 
-//                 }
 //             ]
 //         });
 
@@ -33,11 +29,11 @@ const getOrdersController = async (req, res) => {
 
 //         res.json(orderDetails);
 //     } catch (error) {
-//         console.error('Error al obtener los detalles de la orden:', error);
+//         console.error(error);
 //         res.status(500).json({ error: 'Error al obtener los detalles de la orden' });
 //     }
 // };
 
 
 
-module.exports = { getOrdersController, }
+module.exports = { getOrdersController, getOrderDetails }
