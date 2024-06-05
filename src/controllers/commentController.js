@@ -36,10 +36,10 @@ const replyToComment = async (content, userId, commentId) => {
 const getCommentsBySuplementId = async (suplementId) => {
     try {
         const comments = await Comment.findAll({
-            where: { suplementId },
+            where: { suplementId ,parentId: null},
             include: [
-                { model: User, attributes: ['id', 'username'] },
-                { model: Comment, as: 'Replies', include: [{ model: User, attributes: ['id', 'username'] }] }
+                { model: User, attributes: ['id', 'name'] },
+                { model: Comment, as: 'responses', include: [{ model: User, attributes: ['id', 'name'] }]  }
             ],
             order: [['createdAt', 'ASC']]
         });
