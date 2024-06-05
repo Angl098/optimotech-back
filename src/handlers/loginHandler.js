@@ -13,8 +13,8 @@ const loginHandler = async (req, res) => {
           if (!validate) {
             return res.status(200).json({ message: 'Contraseña incorrecta' });
           }
-const {id, name, address, cellphone, sex} = user;
-const dataUser = {id, email, name, address, cellphone, sex};
+const {id, name, address, cellphone, sex, role} = user;
+const dataUser = {id, email, name, address, cellphone, sex,role};
     // Si el usuario y la contraseña son válidos, enviar una respuesta exitosa
     res.status(200).json({ message: 'Autenticación exitosa', dataUser });
     } catch (error) {

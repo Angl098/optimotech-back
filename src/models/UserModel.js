@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-
     sequelize.define('user', {
         id: {
             type: DataTypes.UUID,
@@ -35,10 +34,13 @@ module.exports = (sequelize) => {
         banned: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
+        },
+        role: {
+            type: DataTypes.ENUM('user', 'admin'),
+            defaultValue: 'user'
         }
     }, {
         paranoid: true, // Activar borrado lógico
         timestamps: false,
-    }
-    );
+    });
 }
