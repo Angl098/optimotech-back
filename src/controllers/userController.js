@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { User } = require('../db');
 const transporter = require('../helper/mailer');
-
+const { hashPassword } = require('../utils/hashedPassword');
 const createUser = async (name, sex, email, password, cellphone, address) => {
     return await User.create({name, sex, email, password, cellphone, address});
 }
@@ -57,8 +57,30 @@ const getFilteredUserController = async (params) => {
         throw Error(error.message);
     }
 };
+
+const changePasswordController = async (email, newPassword) => {
+    try {
+        // Hashear la nueva contraseña
+        const hashedPassword = await hashPassword(newPassword);
+
+        // Buscar y actualizar la contraseña del usuario
+        const [updated] = await User.update(
+            { password: hashedPassword },
+            { where: { email } }
+        );
+
+        if (updated) {
+            return { message: 'Contraseña actualizada exitosamente' };
+        } else {
+            throw new Error('Usuario no encontrado');
+        }
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
 module.exports = {
-    createUser,
+    getFilteredUserController,
     sendEmailController,
-    getFilteredUserController
-}
+    createUser,
+    changePasswordController
+};

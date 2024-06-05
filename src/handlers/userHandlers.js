@@ -1,5 +1,5 @@
 const {hashPassword}= require('..//utils/hashedPassword');
-const { createUser, sendEmailController, getFilteredUserController } = require('../controllers/userController');
+const { createUser, sendEmailController, getFilteredUserController, changePasswordController } = require('../controllers/userController');
 
 const { loginController } = require('../controllers/loginController');
 
@@ -49,4 +49,21 @@ const getFilteredUsersHandler = async (req, res) => {
 }
 
 
-module.exports = { createUserHandler, sendEmail ,getFilteredUsersHandler}
+
+const changePasswordHandler = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    try {
+        const response = await changePasswordController(email, newPassword);
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+module.exports = {
+    createUserHandler,
+    sendEmail,
+    getFilteredUsersHandler,
+    changePasswordHandler
+};
