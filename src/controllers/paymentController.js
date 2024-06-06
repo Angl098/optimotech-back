@@ -15,6 +15,19 @@ const createOrder = async (req, res) => {
     // const { items, total } = req.body;
 
     try {
+        const items = req.body.items;
+
+        // Verificar el stock disponible
+        for (const item of items) {
+            const suplemento = await Suplement.findOne({ where: { name: item.title } });
+            if (!suplemento) {
+                return res.status(404).json({ error: `Suplemento con nombre ${item.title} no encontrado` });
+            }
+
+            if (suplemento.amount < item.quantity) {
+                return res.status(400).json({ error: `Stock insuficiente para ${suplemento.name}` });
+            }
+        }
         const body = {
             items: req.body.items.map((item) => {
                 return {
@@ -22,6 +35,7 @@ const createOrder = async (req, res) => {
                     unit_price: parseFloat(item.price),
                     quantity: parseFloat(item.quantity),
                     currency_id: "ARS",
+                    // userId: req.body.userId
                 }
             }
             ),
@@ -30,7 +44,10 @@ const createOrder = async (req, res) => {
                 "failure": `http://localhost:5173/home`,
                 "pending": `http://localhost:5173/home`
             },
-            notification_url: "https://a315-186-128-109-75.ngrok-free.app/payment/webhook",
+            notification_url: "https://3f73-2802-8011-3005-1d00-ddec-b923-f856-71c7.ngrok-free.app/payment/webhook",
+            metadata: {
+                userId: req.body.userId
+            }
         };
 
         const preference = new Preference(client)
@@ -63,10 +80,11 @@ const receiveWebhook = async (req, res) => {
             const payment = response.data;
             // console.log('Datos de la api de mp:', payment);
 
-            const { transaction_details, additional_info, status: mpStatus, payer } = payment;
+            const { transaction_details, additional_info, status: mpStatus, payer, metadata } = payment;
             const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100); // convirtiendo a num entero
             const items = additional_info.items;
-            // console.log('items:', items);
+            const userId = metadata ? metadata.user_id : null;
+            console.log('UserId recibido de metadata:', userId);
             // console.log('Payer:', payer);
 
             let status;
@@ -81,13 +99,13 @@ const receiveWebhook = async (req, res) => {
             const orden = await Orden.create({
                 total: total_paid_amount,
                 status,
-                paymentMethod: 'mercadopago'
+                paymentMethod: 'mercadopago',
+                userId,
             });
 
             console.log('Orden creada:', orden);
             // AÑADIR suplementos a la orden
             for (const item of items) {
-                // ESTRUCTURA DEL ITEM
                 if (!item.title || !item.quantity || !item.unit_price) {
                     throw new Error(`El item no tiene la estructura esperada: ${JSON.stringify(item)}`);
                 }
@@ -102,11 +120,23 @@ const receiveWebhook = async (req, res) => {
                 if (!suplemento) {
                     throw new Error(`Suplemento con título ${suplementoName} no encontrado en la base de datos`);
                 }
-                console.log(`Suplemento encontrado: ${suplemento.id}, añadiendo a la orden`);
+                // console.log(`Suplemento encontrado: ${suplemento.id}, añadiendo a la orden`);
                 await orden.addSuplement(suplemento, { through: { cantidad, precio } });
+
+                if (status === 'completed') {
+                    // Reducir el stock permanentemente
+                    if (suplemento.amount < cantidad) {
+                        console.error(`No hay suficiente stock para el suplemento ${suplemento.name}`);
+                        throw new Error(`No hay suficiente stock para el suplemento ${suplemento.name}`);
+                    }
+                    suplemento.amount -= cantidad;
+                    await suplemento.save();
+                    console.log(`Stock actualizado para el suplemento ${suplemento.name}. Nueva cantidad: ${suplemento.amount}`);
+                }
+                
             }
 
-            res.status(200).send('webhook proces con exito');
+            res.json({ orderId: orden.id, userId: orden.userId });
         } catch (error) {
             console.error('Error al procesar el webhook de Mercado Pago:', error);
             res.status(500).json({
