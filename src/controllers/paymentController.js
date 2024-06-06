@@ -65,8 +65,6 @@ const receiveWebhook = async (req, res) => {
             const payment = response.data;
             console.log('Respuesta de mercado pago:', payment);
 
-            const { transaction_details, additional_info, status: mpStatus, payer } = payment;
-            const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100);
             const { transaction_details, additional_info, status: mpStatus, payer, metadata  } = payment;
             const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100); // convirtiendo a num entero
             const items = additional_info.items;
@@ -100,7 +98,6 @@ const receiveWebhook = async (req, res) => {
 
                 const suplementoName = item.title;
                 const cantidad = parseInt(item.quantity, 10);
-                const precio = Math.round(parseFloat(item.unit_price) * 100);
                 const precio = Math.round(parseFloat(item.unit_price) * 100);
 
                 // console.log(`Buscando suplemento con título: ${suplementoName}`);

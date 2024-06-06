@@ -88,10 +88,9 @@ const getAll = async (req, res) => {
 
 module.exports = {
     createUserHandler,
-    sendEmail,
     getFilteredUsersHandler,
     changePasswordHandler,
-    createUserHandler, sendEmail, getAll ,banUserHandler,unBanUserHandler}
+    createUserHandler, getAll ,banUserHandler,unBanUserHandler}
 
 
 

@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { User } = require('../db');
 const transporter = require('../helper/mailer');
 const { hashPassword } = require('../utils/hashedPassword');
+ 
 const createUser = async (name, sex, email, password, cellphone, address) => {
     return await User.create({name, sex, email, password, cellphone, address});
 }
@@ -19,14 +20,6 @@ const sendEmailController = async (email, name, type) => {
     return await transporter.sendMail(mailInfo)
 }
 
-const sendEmailController = async (email) => {
-    return await transporter.sendMail({
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Optimotech - Cuenta Creada',
-        html: `<h1>¡Cuenta creada exitosamente!</h1>`
-    })
-}
 const getFilteredUserController = async (params) => {
     const { email,  orderBy, orderDirection, page = 1, pageSize = 7 } = params;
     let order = [];
