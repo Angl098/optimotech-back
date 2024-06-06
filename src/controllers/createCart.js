@@ -25,6 +25,7 @@ const createCart = async (req, res) => {
             paymentStatus,
             userId,
         });
+        console.log(cart,"cart");
         res.status(201).json(cart);
     } catch (error) {
         console.error('Error creating cart:', error);
@@ -34,10 +35,8 @@ const createCart = async (req, res) => {
 
 //agregamos un suplem a un carrito q ya existe
 const addSuplementToCart = async (req, res) => {
-    const {cartId}=req.params
-    console.log(cartId);
-    const {suplements } = req.body;
-    console.log(req.body);
+    const { cartId, suplements } = req.body;
+
     try {
         const cart = await Cart.findByPk(cartId);
         if (!cart) {
