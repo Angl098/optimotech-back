@@ -22,7 +22,6 @@ const createOrder = async (req, res) => {
                     unit_price: parseFloat(item.price),
                     quantity: parseFloat(item.quantity),
                     currency_id: "ARS",
-                    userId: req.body.userId
                 }
             }
             ),
@@ -31,16 +30,13 @@ const createOrder = async (req, res) => {
                 "failure": `http://localhost:5173/home`,
                 "pending": `http://localhost:5173/home`
             },
-            notification_url: "https://1850-186-128-109-75.ngrok-free.app/payment/webhook",
-            metadata: {
-                userId: req.body.userId
-            }
+            notification_url: "https://a315-186-128-109-75.ngrok-free.app/payment/webhook",
         };
 
         const preference = new Preference(client)
 
         const result = await preference.create({ body })
-        console.log(result);
+        // console.log(result);
         res.json({ point: result.init_point, });
     } catch (error) {
         console.log(error);
@@ -65,15 +61,13 @@ const receiveWebhook = async (req, res) => {
             });
 
             const payment = response.data;
-            console.log('Respuesta de mercado pago:', payment);
+            // console.log('Datos de la api de mp:', payment);
 
-            const { transaction_details, additional_info, status: mpStatus, payer, metadata  } = payment;
+            const { transaction_details, additional_info, status: mpStatus, payer } = payment;
             const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100); // convirtiendo a num entero
             const items = additional_info.items;
             // console.log('items:', items);
-            const userId = metadata ? metadata.user_id : null;
             // console.log('Payer:', payer);
-            // console.log('userid recibido de metdata:', userId);
 
             let status;
             if (mpStatus === 'approved') {
@@ -87,8 +81,7 @@ const receiveWebhook = async (req, res) => {
             const orden = await Orden.create({
                 total: total_paid_amount,
                 status,
-                paymentMethod: 'mercadopago',
-                userId,
+                paymentMethod: 'mercadopago'
             });
 
             console.log('Orden creada:', orden);
@@ -101,7 +94,7 @@ const receiveWebhook = async (req, res) => {
 
                 const suplementoName = item.title;
                 const cantidad = parseInt(item.quantity, 10);
-                const precio = Math.round(parseFloat(item.unit_price) * 100);
+                const precio = Math.round(parseFloat(item.unit_price) * 100); 
 
                 // console.log(`Buscando suplemento con título: ${suplementoName}`);
 
@@ -113,8 +106,7 @@ const receiveWebhook = async (req, res) => {
                 await orden.addSuplement(suplemento, { through: { cantidad, precio } });
             }
 
-            // res.status(200).send('webhook procesado con exito');
-            res.json({ orderId: orden.id, userId: orden.userId });
+            res.status(200).send('webhook proces con exito');
         } catch (error) {
             console.error('Error al procesar el webhook de Mercado Pago:', error);
             res.status(500).json({

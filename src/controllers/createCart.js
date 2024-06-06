@@ -25,7 +25,6 @@ const createCart = async (req, res) => {
             paymentStatus,
             userId,
         });
-        console.log(cart,"cart");
         res.status(201).json(cart);
     } catch (error) {
         console.error('Error creating cart:', error);
