@@ -68,7 +68,7 @@ const receiveWebhook = async (req, res) => {
             if (mpStatus === 'approved') {
                 status = 'completed';
                 // Envía un correo electrónico cuando el pago es exitoso
-                await sendEmailController(payer.email);
+                await sendEmailController(payer.email, null, 'buy');
             } else if (mpStatus === 'pending') {
                 status = 'pending';
             } else {

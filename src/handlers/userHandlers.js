@@ -20,7 +20,7 @@ const createUserHandler = async (req, res) => {
         dataUser = { name, sex, email, cellphone, address };
 
         // Enviar el correo electrónico de confirmación
-        const emailResponse = await sendEmailController(email, name);
+        const emailResponse = await sendEmailController(email, name, 'welcome');
 
         res.status(200).json({ message: 'Usuario Registrado "Inicia sesion..."', dataUser, emailResponse });
     } catch (error) {
