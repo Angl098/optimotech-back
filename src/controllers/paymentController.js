@@ -5,7 +5,7 @@ const axios = require('axios')
 //IMPORTS MERCADO PAGO
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 const mercadopago = require('mercadopago')
-
+const { sendEmailController } = require('../controllers/userController'); // Importa la función para enviar correos electrónicos
 
 const client = new MercadoPagoConfig({ accessToken: `${ACCESS_TOKEN}` });
 
@@ -51,8 +51,6 @@ const createOrder = async (req, res) => {
 }
 
 const receiveWebhook = async (req, res) => {
-    // console.log('datos recibidos en el webhook:', req.query);
-
     const paymentId = req.query['data.id'];
     const topic = req.query.type;
 
@@ -67,6 +65,8 @@ const receiveWebhook = async (req, res) => {
             const payment = response.data;
             console.log('Respuesta de mercado pago:', payment);
 
+            const { transaction_details, additional_info, status: mpStatus, payer } = payment;
+            const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100);
             const { transaction_details, additional_info, status: mpStatus, payer, metadata  } = payment;
             const total_paid_amount = Math.round(transaction_details.total_paid_amount * 100); // convirtiendo a num entero
             const items = additional_info.items;
@@ -78,6 +78,8 @@ const receiveWebhook = async (req, res) => {
             let status;
             if (mpStatus === 'approved') {
                 status = 'completed';
+                // Envía un correo electrónico cuando el pago es exitoso
+                await sendEmailController(payer.email, null, 'buy');
             } else if (mpStatus === 'pending') {
                 status = 'pending';
             } else {
@@ -91,16 +93,14 @@ const receiveWebhook = async (req, res) => {
                 userId,
             });
 
-            console.log('Orden creada:', orden);
-            // AÑADIR suplementos a la orden
             for (const item of items) {
-                // ESTRUCTURA DEL ITEM
                 if (!item.title || !item.quantity || !item.unit_price) {
                     throw new Error(`El item no tiene la estructura esperada: ${JSON.stringify(item)}`);
                 }
 
                 const suplementoName = item.title;
                 const cantidad = parseInt(item.quantity, 10);
+                const precio = Math.round(parseFloat(item.unit_price) * 100);
                 const precio = Math.round(parseFloat(item.unit_price) * 100);
 
                 // console.log(`Buscando suplemento con título: ${suplementoName}`);
@@ -109,7 +109,6 @@ const receiveWebhook = async (req, res) => {
                 if (!suplemento) {
                     throw new Error(`Suplemento con título ${suplementoName} no encontrado en la base de datos`);
                 }
-                console.log(`Suplemento encontrado: ${suplemento.id}, añadiendo a la orden`);
                 await orden.addSuplement(suplemento, { through: { cantidad, precio } });
             }
 
@@ -125,7 +124,8 @@ const receiveWebhook = async (req, res) => {
     } else {
         res.status(400).send('tipo de webhook no soportado');
     }
-}
+};
+
 
 
 module.exports = { createOrder, receiveWebhook }
