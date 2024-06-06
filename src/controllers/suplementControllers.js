@@ -152,6 +152,7 @@ const getFilteredSuplementsController = async (params) => {
 
     if (name) where = { ...where, name: { [Op.iLike]: `%${name}%` } }; // Filtro case-insensitive
     if (category) where = { ...where, CategoryId:category  }; // Filtro case-insensitive
+    where = { ...where, amount: { [Op.gt]: 0 } }; // Filtro por stock mayor que 0
 
     try {
         let include = [];
