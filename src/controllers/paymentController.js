@@ -5,7 +5,7 @@ const axios = require('axios')
 //IMPORTS MERCADO PAGO
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 const mercadopago = require('mercadopago')
-
+const { sendEmailController } = require('../controllers/userController'); // Importa la función para enviar correos electrónicos
 
 const client = new MercadoPagoConfig({ accessToken: `${ACCESS_TOKEN}` });
 
@@ -62,7 +62,6 @@ const createOrder = async (req, res) => {
 }
 
 const receiveWebhook = async (req, res) => {
-
     const paymentId = req.query['data.id'];
     const topic = req.query.type;
 
@@ -84,6 +83,8 @@ const receiveWebhook = async (req, res) => {
             let status;
             if (mpStatus === 'approved') {
                 status = 'completed';
+                // Envía un correo electrónico cuando el pago es exitoso
+                await sendEmailController(payer.email, null, 'buy');
             } else if (mpStatus === 'pending') {
                 status = 'pending';
             } else {
@@ -97,7 +98,6 @@ const receiveWebhook = async (req, res) => {
                 userId,
             });
 
-            // AÑADIR suplementos a la orden
             for (const item of items) {
                 if (!item.title || !item.quantity || !item.unit_price) {
                     throw new Error(`El item no tiene la estructura esperada: ${JSON.stringify(item)}`);
@@ -137,7 +137,8 @@ const receiveWebhook = async (req, res) => {
     } else {
         res.status(400).send('tipo de webhook no soportado');
     }
-}
+};
+
 
 
 module.exports = { createOrder, receiveWebhook }
