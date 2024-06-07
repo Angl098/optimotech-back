@@ -11,26 +11,27 @@ const getOrdersController = async (req, res) => {
 }
 
 
- const getOrderDetails = async (req, res) => {
-     const { orderId } = req.params;
-     try {
-         const orderDetails = await Orden.findOne({
-             where: { id: orderId },
-             include: [
-                 {
-                     model: OrdenSuplement,
-                 },
-             ]
-         });
-         if (!orderDetails) {
-             return res.status(404).json({ error: 'Orden no encontrada' });
-         }
-         res.json(orderDetails);
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener los detalles de la orden' });
-     }
- };
+const getOrderDetails = async (req, res) => {
+    const { id } = req.params;  // Assuming this is the userId
+    console.log(id, "Userid");
+    try {
+        const orderDetails = await Orden.findAll({
+            where: { userId: id },  // Fetch orders based on userId
+            include: [
+                {
+                    model: Suplement
+                }
+            ]
+        });
+        if (!orderDetails || orderDetails.length === 0) {
+            return res.status(404).json({ error: 'Orden no encontrada' });
+        }
+        res.json(orderDetails);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener los detalles de la orden' });
+    }
+};
 
 
 

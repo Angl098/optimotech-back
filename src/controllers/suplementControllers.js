@@ -142,7 +142,7 @@ const createSuplement = async (suplement, category, provider, tags) => {
 };
 
 const getFilteredSuplementsController = async (params) => {
-    const { category, tags, provider, orderBy, orderDirection, name, page = 1, pageSize = 7 } = params;
+    const { category, tags, provider, orderBy="price", orderDirection="ASC", name, page = 1, pageSize = 7 } = params;
     let order = [];
     if (orderBy && orderDirection) {
         order = [[orderBy, orderDirection]]
