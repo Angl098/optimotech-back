@@ -28,6 +28,10 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        sales:{
+            type:DataTypes.INTEGER,
+            defaultValue:0
+        },
         wigth:{
             type:DataTypes.INTEGER,
             defaultValue:1,

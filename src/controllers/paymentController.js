@@ -121,6 +121,7 @@ const receiveWebhook = async (req, res) => {
                         throw new Error(`No hay suficiente stock para el suplemento ${suplemento.name}`);
                     }
                     suplemento.amount -= cantidad;
+                    suplemento.sales+= cantidad;
                     await suplemento.save();
                 }
                 

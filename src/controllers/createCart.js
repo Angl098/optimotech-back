@@ -1,9 +1,52 @@
+const { Op } = require('sequelize');
 const { Cart, Suplement, User  } = require('../db');
 
 const getAllCarts = async (req, res) => {
+    const { fecha, orderBy, orderDirection, page = 1, pageSize = 7 } = req.query;
+    let order = [];
+    if (orderBy && orderDirection) {
+        order = [[orderBy, orderDirection]]
+    }
+    let where = {};
+
+    
+    if (fecha) {
+        const startDate = new Date(fecha);
+        const endDate = new Date(fecha);
+        endDate.setDate(endDate.getDate() + 1);
+
+        where = {
+            ...where,
+            createdAt: {
+                [Op.between]: [startDate, endDate]
+            }
+        };
+    }
     try {
-        const carts = await Cart.findAll();
-        res.status(200).json(carts);
+        let include = [];
+
+        const offset = (page - 1) * pageSize;
+
+        const body = {
+            include,
+            where,
+            order,
+            limit: pageSize,
+            offset
+        }
+        
+
+        const { count, rows } = await Cart.findAndCountAll(body);
+        // Calcular el número total de páginas
+        const totalPages = Math.ceil(count / pageSize);
+        
+        res.status(200).json({
+            totalPages,
+            currentPage: page,
+            pageSize,
+            totalItems: count,
+            items: rows
+        });
     } catch (error) {
         console.error('Error fetching carts:', error);
         res.status(500).json({ error: 'Error fetching carts' });
